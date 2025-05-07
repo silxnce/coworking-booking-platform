@@ -1,8 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Transport, MicroserviceOptions } from '@nestjs/microservices';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pack = require('./../package.json');
+import { RpcExceptionsFilter } from './rpc-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -11,11 +10,12 @@ async function bootstrap() {
       transport: Transport.RMQ,
       options: {
         urls: [process.env.RABBITMQ_URL as string],
-        queue: pack.name,
+        queue: 'booking-service',
         queueOptions: { durable: false },
       },
     },
   );
+  app.useGlobalFilters(new RpcExceptionsFilter());
   await app.listen();
 }
 bootstrap();

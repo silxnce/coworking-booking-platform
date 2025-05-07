@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import { HttpException, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom, throwError, TimeoutError } from 'rxjs';
+import { firstValueFrom, TimeoutError } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
 import { LoginUserDto } from './dto/login-user.dto';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -10,16 +10,16 @@ import { RegisterUserDto } from './dto/register-user.dto';
 export class UserService {
   constructor(@Inject('USER_SERVICE') private client: ClientProxy) {}
 
-  async register(dto: RegisterUserDto) {
-    return this.send('register', dto);
+  async register(registerUserDto: RegisterUserDto) {
+    return await this.send('register', registerUserDto);
   }
 
-  async login(dto: LoginUserDto) {
-    return this.send('login', dto);
+  async login(loginUserDto: LoginUserDto) {
+    return await this.send('login', loginUserDto);
   }
 
   async validateAccessToken(token: string) {
-    return this.send('validate-access-token', token);
+    return await this.send('validate-access-token', token);
   }
 
   private async send(pattern: string, data: any): Promise<any> {
@@ -39,7 +39,7 @@ export class UserService {
 
         let message = raw.message;
         if (message && typeof message === 'object' && 'message' in message) {
-          message = (message as any).message;
+          message = message.message;
         }
         message = message ?? 'Unknown service error';
 
